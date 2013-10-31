@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html
+   xmlns="http://www.w3.org/1999/xhtml"
+   xmlns:h="http://java.sun.com/jsf/html"
+   xmlns:ui="http://java.sun.com/jsf/facelets"
+   xmlns:f="http://java.sun.com/jsf/core">
+<body>
+   <h:form id="ping">
+      <h:commandButton
+         id="buttonPing"
+         value="Ping"
+         action="#{dummy.ping}">
+         <f:actionListener
+            type="org.jboss.as.test.integration.ee.injection.support.jsf.TestActionListener" />
+      </h:commandButton>
+   </h:form>
+   <ul>
+      <li>Injection:#{controller.injectionPerformed}</li>
+      <li>PostConstruct:#{controller.postConstructCallbackInvoked}</li>
+      <li>Interceptions:<ui:repeat
+            var="interception"
+            value="#{controller.interceptions}">#{interception.methodName},</ui:repeat></li>
+   </ul>
+</body>
+</html>
