@@ -21,6 +21,7 @@
       <module>jpa</module>
       <module>bean-validation</module>
       <module>webservices</module>
+      <module>transactions</module>
       <module>subsystem</module>
    </modules>
 

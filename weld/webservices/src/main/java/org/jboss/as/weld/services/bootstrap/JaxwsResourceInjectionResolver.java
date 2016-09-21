@@ -19,26 +19,28 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.as.weld.deployment.processors;
+package org.jboss.as.weld.services.bootstrap;
 
-import java.util.Collection;
-import java.util.Collections;
+import javax.xml.ws.WebServiceContext;
 
-import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.as.server.deployment.module.ResourceRoot;
-import org.jboss.as.weld.services.bootstrap.WeldJaxwsInjectionServices;
-import org.jboss.as.weld.spi.ModuleServicesProvider;
-import org.jboss.modules.Module;
-import org.jboss.weld.bootstrap.api.Service;
+import org.jboss.as.weld.spi.ResourceInjectionResolver;
+import org.jboss.ws.common.injection.ThreadLocalAwareWebServiceContext;
 
 /**
  *
  * @author Martin Kouba
  */
-public class JaxwsModuleServiceProvider implements ModuleServicesProvider {
+public class JaxwsResourceInjectionResolver implements ResourceInjectionResolver {
 
     @Override
-    public Collection<Service> getServices(DeploymentUnit rootDeploymentUnit, DeploymentUnit deploymentUnit, Module module, ResourceRoot resourceRoot) {
-        return Collections.singleton(new WeldJaxwsInjectionServices(deploymentUnit));
+    public Object resolve(String resourceName) {
+        if (resourceName.equals(WebServiceContext.class.getName())) {
+            // horrible hack
+            // we don't have anywhere we can look this up
+            // See also WFLY-4487
+            return ThreadLocalAwareWebServiceContext.getInstance();
+        }
+        return null;
     }
+
 }

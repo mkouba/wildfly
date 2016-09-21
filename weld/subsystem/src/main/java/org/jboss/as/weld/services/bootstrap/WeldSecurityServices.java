@@ -24,6 +24,7 @@ package org.jboss.as.weld.services.bootstrap;
 import java.security.Principal;
 
 import org.jboss.as.security.service.SimpleSecurityManager;
+import org.jboss.as.weld.ServiceNames;
 import org.jboss.as.weld.logging.WeldLogger;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
@@ -35,7 +36,7 @@ import org.jboss.weld.security.spi.SecurityServices;
 
 public class WeldSecurityServices implements Service<WeldSecurityServices>, SecurityServices {
 
-    public static final ServiceName SERVICE_NAME = ServiceName.of("WeldSecurityServices");
+    public static final ServiceName SERVICE_NAME = ServiceNames.WELD_SECURITY_SERVICES_SERVICE_NAME;
 
     private final InjectedValue<SimpleSecurityManager> securityManagerValue = new InjectedValue<SimpleSecurityManager>();
 

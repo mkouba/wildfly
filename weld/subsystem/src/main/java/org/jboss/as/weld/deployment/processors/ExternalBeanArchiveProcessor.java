@@ -49,7 +49,6 @@ import org.jboss.as.weld.deployment.PropertyReplacingBeansXmlParser;
 import org.jboss.as.weld.deployment.UrlScanner;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.as.weld.logging.WeldLogger;
-import org.jboss.as.weld.services.bootstrap.WeldJaxwsInjectionServices;
 import org.jboss.as.weld.spi.ComponentSupport;
 import org.jboss.as.weld.spi.ModuleServicesProvider;
 import org.jboss.as.weld.util.Reflections;
@@ -62,7 +61,6 @@ import org.jboss.modules.ModuleLoader;
 import org.jboss.modules.Resource;
 import org.jboss.weld.bootstrap.api.Service;
 import org.jboss.weld.bootstrap.spi.BeansXml;
-import org.jboss.weld.injection.spi.JaxwsInjectionServices;
 import org.jboss.weld.xml.BeansXmlParser;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
@@ -183,10 +181,7 @@ public class ExternalBeanArchiveProcessor implements DeploymentUnitProcessor {
                         final BeanDeploymentArchiveImpl bda = new BeanDeploymentArchiveImpl(new HashSet<String>(discoveredClasses), beansXml, dependency, beanArchiveIdPrefix + url.toExternalForm(), BeanArchiveType.EXTERNAL);
                         WeldLogger.DEPLOYMENT_LOGGER.beanArchiveDiscovered(bda);
 
-                        final JaxwsInjectionServices jaxwsInjectionServices = new WeldJaxwsInjectionServices(deploymentUnit);
-                        bda.getServices().add(JaxwsInjectionServices.class, jaxwsInjectionServices);
-
-                        // TODO Add module services to external bean deployment archive
+                        // Add module services to external bean deployment archive
                         for (Entry<Class<? extends Service>, Service> entry : ServiceLoaders
                                 .loadModuleServices(moduleServicesProviders, deploymentUnit, deployment, module, null).entrySet()) {
                             bda.getServices().add(entry.getKey(), Reflections.cast(entry.getValue()));

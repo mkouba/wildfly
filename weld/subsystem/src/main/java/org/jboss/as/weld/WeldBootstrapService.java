@@ -35,8 +35,6 @@ import org.jboss.as.weld.deployment.BeanDeploymentArchiveImpl;
 import org.jboss.as.weld.deployment.WeldDeployment;
 import org.jboss.as.weld.logging.WeldLogger;
 import org.jboss.as.weld.services.ModuleGroupSingletonProvider;
-import org.jboss.as.weld.services.bootstrap.WeldSecurityServices;
-import org.jboss.as.weld.services.bootstrap.WeldTransactionServices;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
@@ -71,8 +69,8 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
 
     private final String deploymentName;
 
-    private final InjectedValue<WeldSecurityServices> securityServices = new InjectedValue<WeldSecurityServices>();
-    private final InjectedValue<WeldTransactionServices> weldTransactionServices = new InjectedValue<WeldTransactionServices>();
+    private final InjectedValue<SecurityServices> securityServices = new InjectedValue<SecurityServices>();
+    private final InjectedValue<TransactionServices> weldTransactionServices = new InjectedValue<TransactionServices>();
     private final InjectedValue<ExecutorServices> executorServices = new InjectedValue<ExecutorServices>();
     private final InjectedValue<ExecutorService> serverExecutor = new InjectedValue<ExecutorService>();
 
@@ -241,11 +239,11 @@ public class WeldBootstrapService implements Service<WeldBootstrapService> {
         return this;
     }
 
-    public InjectedValue<WeldSecurityServices> getSecurityServices() {
+    public InjectedValue<SecurityServices> getSecurityServices() {
         return securityServices;
     }
 
-    public InjectedValue<WeldTransactionServices> getWeldTransactionServices() {
+    public InjectedValue<TransactionServices> getWeldTransactionServices() {
         return weldTransactionServices;
     }
 

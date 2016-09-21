@@ -105,7 +105,7 @@ class WeldSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 processorTarget.addDeploymentProcessor(WeldExtension.SUBSYSTEM_NAME, Phase.INSTALL, Phase.INSTALL_WELD_DEPLOYMENT, new WeldDeploymentProcessor(checkJtsEnabled(context)));
                 processorTarget.addDeploymentProcessor(WeldExtension.SUBSYSTEM_NAME, Phase.INSTALL, Phase.INSTALL_WELD_BEAN_MANAGER, new WeldBeanManagerServiceProcessor());
 
-                // TODO
+                // Add additional deployment processors
                 ServiceLoader<DeploymentUnitProcessorProvider> processorProviders = ServiceLoader.load(DeploymentUnitProcessorProvider.class,
                         WildFlySecurityManager.getClassLoaderPrivileged(WeldSubsystemAdd.class));
                 for (DeploymentUnitProcessorProvider provider : processorProviders) {

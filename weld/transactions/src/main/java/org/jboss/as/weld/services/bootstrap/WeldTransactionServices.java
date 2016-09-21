@@ -28,6 +28,7 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
+import org.jboss.as.weld.ServiceNames;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
@@ -47,7 +48,7 @@ import org.jboss.weld.transaction.spi.TransactionServices;
  */
 public class WeldTransactionServices implements TransactionServices, Service<WeldTransactionServices> {
 
-    public static final ServiceName SERVICE_NAME = ServiceName.of("WeldTransactionServices");
+    public static final ServiceName SERVICE_NAME = ServiceNames.WELD_TRANSACTION_SERVICES_SERVICE_NAME;
 
     private final InjectedValue<UserTransaction> injectedTransaction = new InjectedValue<UserTransaction>();
 

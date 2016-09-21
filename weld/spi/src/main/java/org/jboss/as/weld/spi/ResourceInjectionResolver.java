@@ -19,26 +19,19 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.as.weld.deployment.processors;
-
-import java.util.Collection;
-import java.util.Collections;
-
-import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.as.server.deployment.module.ResourceRoot;
-import org.jboss.as.weld.services.bootstrap.WeldJaxwsInjectionServices;
-import org.jboss.as.weld.spi.ModuleServicesProvider;
-import org.jboss.modules.Module;
-import org.jboss.weld.bootstrap.api.Service;
+package org.jboss.as.weld.spi;
 
 /**
  *
  * @author Martin Kouba
  */
-public class JaxwsModuleServiceProvider implements ModuleServicesProvider {
+public interface ResourceInjectionResolver {
 
-    @Override
-    public Collection<Service> getServices(DeploymentUnit rootDeploymentUnit, DeploymentUnit deploymentUnit, Module module, ResourceRoot resourceRoot) {
-        return Collections.singleton(new WeldJaxwsInjectionServices(deploymentUnit));
-    }
+    /**
+     *
+     * @param resourceName
+     * @return the resolved object or <code>null</code> if not able to resolve the given name
+     */
+    Object resolve(String resourceName);
+
 }

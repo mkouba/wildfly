@@ -46,8 +46,7 @@
         <module name="org.jboss.as.weld.jpa" optional="true" services="import" />
         <module name="org.jboss.as.weld.beanvalidation" optional="true" services="import" />
         <module name="org.jboss.as.weld.webservices" optional="true" services="import" />
-        <!-- TODO -->
-        <module name="com.google.guava"/>
+        <module name="org.jboss.as.weld.transactions" optional="true" services="import" />
         <module name="javax.api"/>
         <module name="javax.annotation.api"/>
         <module name="javax.ejb.api" />
@@ -68,7 +67,6 @@
         <module name="org.wildfly.security.elytron"/>
         <module name="org.jboss.as.security"/>
         <module name="org.jboss.as.server"/>
-        <module name="org.jboss.as.transactions"/>
         <module name="org.jboss.as.web-common"/>
         <module name="org.jboss.invocation"/>
         <module name="org.jboss.logging"/>
@@ -79,7 +77,8 @@
         <module name="org.jboss.msc"/>
         <module name="org.jboss.threads"/>
         <module name="org.jboss.vfs"/>
-        <module name="org.omg.api"/>
-
+        <!-- TODO remove once weld upgraded to 2.4 -->
+        <module name="com.google.guava"/>
     </dependencies>
+
 </module>

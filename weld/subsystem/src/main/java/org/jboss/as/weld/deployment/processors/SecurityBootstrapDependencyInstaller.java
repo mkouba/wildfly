@@ -21,24 +21,31 @@
  */
 package org.jboss.as.weld.deployment.processors;
 
-import java.util.Collection;
-import java.util.Collections;
-
+import org.jboss.as.security.service.SimpleSecurityManager;
+import org.jboss.as.security.service.SimpleSecurityManagerService;
 import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.as.server.deployment.module.ResourceRoot;
-import org.jboss.as.weld.services.bootstrap.WeldJaxwsInjectionServices;
-import org.jboss.as.weld.spi.ModuleServicesProvider;
-import org.jboss.modules.Module;
-import org.jboss.weld.bootstrap.api.Service;
+import org.jboss.as.weld.services.bootstrap.WeldSecurityServices;
+import org.jboss.as.weld.spi.BootstrapDependencyInstaller;
+import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceName;
+import org.jboss.msc.service.ServiceTarget;
 
 /**
  *
  * @author Martin Kouba
  */
-public class JaxwsModuleServiceProvider implements ModuleServicesProvider {
+public class SecurityBootstrapDependencyInstaller implements BootstrapDependencyInstaller {
 
     @Override
-    public Collection<Service> getServices(DeploymentUnit rootDeploymentUnit, DeploymentUnit deploymentUnit, Module module, ResourceRoot resourceRoot) {
-        return Collections.singleton(new WeldJaxwsInjectionServices(deploymentUnit));
+    public ServiceName install(ServiceTarget serviceTarget, DeploymentUnit deploymentUnit, boolean jtsEnabled) {
+        final WeldSecurityServices service = new WeldSecurityServices();
+
+        final ServiceName serviceName = deploymentUnit.getServiceName().append(WeldSecurityServices.SERVICE_NAME);
+
+        serviceTarget.addService(serviceName, service).addDependency(ServiceBuilder.DependencyType.OPTIONAL, SimpleSecurityManagerService.SERVICE_NAME,
+                SimpleSecurityManager.class, service.getSecurityManagerValue()).install();
+
+        return serviceName;
     }
+
 }

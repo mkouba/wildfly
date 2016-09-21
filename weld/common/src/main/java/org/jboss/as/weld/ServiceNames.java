@@ -26,9 +26,13 @@ import org.jboss.msc.service.ServiceName;
 
 public final class ServiceNames {
 
-    public static final ServiceName WELD_START_SERVICE_NAME =  ServiceName.of("WeldStartService");
+    public static final ServiceName WELD_START_SERVICE_NAME = ServiceName.of("WeldStartService");
 
-    public static final ServiceName BEAN_MANAGER_SERVICE_NAME =  ServiceName.of("beanmanager");
+    public static final ServiceName BEAN_MANAGER_SERVICE_NAME = ServiceName.of("beanmanager");
+
+    public static final ServiceName WELD_SECURITY_SERVICES_SERVICE_NAME = ServiceName.of("WeldSecurityServices");
+
+    public static final ServiceName WELD_TRANSACTION_SERVICES_SERVICE_NAME = ServiceName.of("WeldTransactionServices");
 
     public static ServiceName beanManagerServiceName(final DeploymentUnit deploymentUnit) {
         return deploymentUnit.getServiceName().append(BEAN_MANAGER_SERVICE_NAME);

@@ -64,23 +64,12 @@
 
       <dependency>
          <groupId>org.wildfly</groupId>
-         <artifactId>wildfly-transactions</artifactId>
-      </dependency>
-
-      <dependency>
-         <groupId>org.wildfly</groupId>
          <artifactId>wildfly-web-common</artifactId>
       </dependency>
 
       <dependency>
          <groupId>org.wildfly</groupId>
-         <artifactId>wildfly-webservices-server-integration</artifactId>
-         <exclusions>
-            <exclusion>
-               <artifactId>wildfly-ejb3</artifactId>
-               <groupId>org.wildfly</groupId>
-            </exclusion>
-         </exclusions>
+         <artifactId>wildfly-security</artifactId>
       </dependency>
 
       <dependency>

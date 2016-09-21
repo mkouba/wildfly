@@ -25,6 +25,7 @@ import static org.jboss.as.weld.util.ResourceInjectionUtilities.getResourceAnnot
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.ServiceLoader;
 
 import javax.annotation.Resource;
 import javax.enterprise.inject.Produces;
@@ -41,6 +42,7 @@ import org.jboss.as.ee.component.EEModuleDescription;
 import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.as.naming.deployment.ContextNames.BindInfo;
 import org.jboss.as.weld.logging.WeldLogger;
+import org.jboss.as.weld.spi.ResourceInjectionResolver;
 import org.jboss.as.weld.util.ResourceInjectionUtilities;
 import org.jboss.modules.Module;
 import org.jboss.msc.service.ServiceRegistry;
@@ -48,7 +50,7 @@ import org.jboss.weld.injection.spi.ResourceInjectionServices;
 import org.jboss.weld.injection.spi.ResourceReference;
 import org.jboss.weld.injection.spi.ResourceReferenceFactory;
 import org.jboss.weld.injection.spi.helpers.SimpleResourceReference;
-import org.jboss.ws.common.injection.ThreadLocalAwareWebServiceContext;
+import org.wildfly.security.manager.WildFlySecurityManager;
 
 public class WeldResourceInjectionServices extends AbstractResourceInjectionServices implements ResourceInjectionServices {
 
@@ -76,6 +78,8 @@ public class WeldResourceInjectionServices extends AbstractResourceInjectionServ
     private static final String WEB_SERVICE_CONTEXT_CLASS_NAME = "javax.xml.ws.WebServiceContext";
 
     private final Context context;
+
+    private final Iterable<ResourceInjectionResolver> resourceResolvers;
 
     protected String getEJBResourceName(InjectionPoint injectionPoint, String proposedName) {
         if (injectionPoint.getType() instanceof Class<?>) {
@@ -132,6 +136,8 @@ public class WeldResourceInjectionServices extends AbstractResourceInjectionServ
         } catch (NamingException e) {
             throw new RuntimeException(e);
         }
+        this.resourceResolvers = ServiceLoader.load(ResourceInjectionResolver.class,
+                WildFlySecurityManager.getClassLoaderPrivileged(WeldResourceInjectionServices.class));
     }
 
     protected String getResourceName(InjectionPoint injectionPoint) {
@@ -203,10 +209,12 @@ public class WeldResourceInjectionServices extends AbstractResourceInjectionServ
             throw WeldLogger.ROOT_LOGGER.injectionPointNotAJavabean((Method) member);
         }
         String name = getResourceName(injectionPoint);
-        //horrible hack
-        //we don't have anywhere we can look this up
-        if(name.equals(WEB_SERVICE_CONTEXT_CLASS_NAME)) {
-            return ThreadLocalAwareWebServiceContext.getInstance();
+
+        for (ResourceInjectionResolver resolver : resourceResolvers) {
+            Object result = resolver.resolve(name);
+            if (result != null) {
+                return result;
+            }
         }
         try {
             return context.lookup(name);

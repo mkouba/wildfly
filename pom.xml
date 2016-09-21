@@ -1329,6 +1329,12 @@
 
             <dependency>
                 <groupId>org.wildfly</groupId>
+                <artifactId>wildfly-weld-transactions</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wildfly</groupId>
                 <artifactId>wildfly-xts</artifactId>
                 <version>${project.version}</version>
             </dependency>

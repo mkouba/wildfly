@@ -2784,6 +2784,17 @@
 
         <dependency>
             <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-weld-transactions</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wildfly</groupId>
             <artifactId>wildfly-webservices-server-integration</artifactId>
             <exclusions>
                 <exclusion>

@@ -35,8 +35,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import javax.enterprise.inject.spi.Extension;
-import javax.transaction.TransactionManager;
-import javax.transaction.UserTransaction;
 
 import org.jboss.as.ee.naming.JavaNamespaceSetup;
 import org.jboss.as.ee.weld.WeldDeploymentMarker;
@@ -44,8 +42,6 @@ import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.as.naming.deployment.JndiNamingDependencyProcessor;
 import org.jboss.as.naming.service.DefaultNamespaceContextSelectorService;
 import org.jboss.as.naming.service.NamingService;
-import org.jboss.as.security.service.SimpleSecurityManager;
-import org.jboss.as.security.service.SimpleSecurityManagerService;
 import org.jboss.as.server.Services;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
@@ -56,8 +52,7 @@ import org.jboss.as.server.deployment.SetupAction;
 import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
 import org.jboss.as.server.deployment.module.ResourceRoot;
-import org.jboss.as.txn.service.TransactionManagerService;
-import org.jboss.as.txn.service.UserTransactionService;
+import org.jboss.as.weld.ServiceNames;
 import org.jboss.as.weld.WeldBootstrapService;
 import org.jboss.as.weld.WeldStartService;
 import org.jboss.as.weld.deployment.BeanDeploymentArchiveImpl;
@@ -69,8 +64,7 @@ import org.jboss.as.weld.deployment.WeldPortableExtensions;
 import org.jboss.as.weld.logging.WeldLogger;
 import org.jboss.as.weld.services.TCCLSingletonService;
 import org.jboss.as.weld.services.bootstrap.WeldExecutorServices;
-import org.jboss.as.weld.services.bootstrap.WeldSecurityServices;
-import org.jboss.as.weld.services.bootstrap.WeldTransactionServices;
+import org.jboss.as.weld.spi.BootstrapDependencyInstaller;
 import org.jboss.as.weld.spi.DeploymentUnitDependenciesProvider;
 import org.jboss.as.weld.spi.ModuleServicesProvider;
 import org.jboss.as.weld.util.Reflections;
@@ -90,6 +84,8 @@ import org.jboss.weld.config.ConfigurationKey;
 import org.jboss.weld.configuration.spi.ExternalConfiguration;
 import org.jboss.weld.configuration.spi.helpers.ExternalConfigurationBuilder;
 import org.jboss.weld.manager.api.ExecutorServices;
+import org.jboss.weld.security.spi.SecurityServices;
+import org.jboss.weld.transaction.spi.TransactionServices;
 import org.wildfly.security.manager.WildFlySecurityManager;
 
 /**
@@ -243,8 +239,18 @@ public class WeldDeploymentProcessor implements DeploymentUnitProcessor {
         weldBootstrapServiceBuilder.addDependency(WeldExecutorServices.SERVICE_NAME, ExecutorServices.class, weldBootstrapService.getExecutorServices());
         weldBootstrapServiceBuilder.addDependency(Services.JBOSS_SERVER_EXECUTOR, ExecutorService.class, weldBootstrapService.getServerExecutor());
 
-        installSecurityService(serviceTarget, deploymentUnit, weldBootstrapService, weldBootstrapServiceBuilder);
-        installTransactionService(serviceTarget, deploymentUnit, weldBootstrapService, weldBootstrapServiceBuilder);
+        // Install additional services
+        final ServiceLoader<BootstrapDependencyInstaller> installers = ServiceLoader.load(BootstrapDependencyInstaller.class,
+                WildFlySecurityManager.getClassLoaderPrivileged(WeldDeploymentProcessor.class));
+        for (BootstrapDependencyInstaller installer : installers) {
+            ServiceName serviceName = installer.install(serviceTarget, deploymentUnit, jtsEnabled);
+            // Add dependency for recognized services
+            if (ServiceNames.WELD_SECURITY_SERVICES_SERVICE_NAME.getSimpleName().equals(serviceName.getSimpleName())) {
+                weldBootstrapServiceBuilder.addDependency(serviceName, SecurityServices.class, weldBootstrapService.getSecurityServices());
+            } else if (ServiceNames.WELD_TRANSACTION_SERVICES_SERVICE_NAME.getSimpleName().equals(serviceName.getSimpleName())) {
+                weldBootstrapServiceBuilder.addDependency(serviceName, TransactionServices.class, weldBootstrapService.getWeldTransactionServices());
+            }
+        }
 
         weldBootstrapServiceBuilder.install();
 
@@ -287,38 +293,6 @@ public class WeldDeploymentProcessor implements DeploymentUnitProcessor {
         return dependencies;
     }
 
-    private ServiceName installSecurityService(ServiceTarget serviceTarget, DeploymentUnit deploymentUnit,
-                                               WeldBootstrapService weldService, ServiceBuilder<WeldBootstrapService> weldServiceBuilder) {
-        final WeldSecurityServices service = new WeldSecurityServices();
-
-        final ServiceName serviceName = deploymentUnit.getServiceName().append(WeldSecurityServices.SERVICE_NAME);
-
-        serviceTarget.addService(serviceName, service)
-                .addDependency(ServiceBuilder.DependencyType.OPTIONAL, SimpleSecurityManagerService.SERVICE_NAME, SimpleSecurityManager.class, service.getSecurityManagerValue()).install();
-
-        weldServiceBuilder.addDependency(serviceName, WeldSecurityServices.class, weldService.getSecurityServices());
-
-        return serviceName;
-    }
-
-    private ServiceName installTransactionService(final ServiceTarget serviceTarget, final DeploymentUnit deploymentUnit,
-                                                  WeldBootstrapService weldService, ServiceBuilder<WeldBootstrapService> weldServiceBuilder) {
-        final WeldTransactionServices weldTransactionServices = new WeldTransactionServices(jtsEnabled);
-
-        final ServiceName weldTransactionServiceName = deploymentUnit.getServiceName().append(
-                WeldTransactionServices.SERVICE_NAME);
-
-        serviceTarget.addService(weldTransactionServiceName, weldTransactionServices).addDependency(
-                TransactionManagerService.SERVICE_NAME, TransactionManager.class,
-                weldTransactionServices.getInjectedTransactionManager()).addDependency(UserTransactionService.SERVICE_NAME,
-                UserTransaction.class, weldTransactionServices.getInjectedTransaction()).install();
-
-        weldServiceBuilder.addDependency(weldTransactionServiceName, WeldTransactionServices.class, weldService
-                .getWeldTransactionServices());
-
-        return weldTransactionServiceName;
-    }
-
     private void installBootstrapConfigurationService(WeldDeployment deployment, DeploymentUnit parentDeploymentUnit) {
         final boolean nonPortableMode = parentDeploymentUnit.getAttachment(WeldConfiguration.ATTACHMENT_KEY).isNonPortableMode();
         final ExternalConfiguration configuration = new ExternalConfigurationBuilder()
@@ -333,7 +307,7 @@ public class WeldDeploymentProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void undeploy(DeploymentUnit context) {
-        final ServiceName weldTransactionServiceName = context.getServiceName().append(WeldTransactionServices.SERVICE_NAME);
+        final ServiceName weldTransactionServiceName = context.getServiceName().append(ServiceNames.WELD_TRANSACTION_SERVICES_SERVICE_NAME);
         final ServiceController<?> serviceController = context.getServiceRegistry().getService(weldTransactionServiceName);
         if (serviceController != null) {
             serviceController.setMode(ServiceController.Mode.REMOVE);

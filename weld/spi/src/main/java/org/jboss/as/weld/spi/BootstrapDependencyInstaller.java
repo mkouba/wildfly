@@ -19,26 +19,29 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.jboss.as.weld.deployment.processors;
-
-import java.util.Collection;
-import java.util.Collections;
+package org.jboss.as.weld.spi;
 
 import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.as.server.deployment.module.ResourceRoot;
-import org.jboss.as.weld.services.bootstrap.WeldJaxwsInjectionServices;
-import org.jboss.as.weld.spi.ModuleServicesProvider;
-import org.jboss.modules.Module;
+import org.jboss.msc.service.ServiceName;
+import org.jboss.msc.service.ServiceTarget;
 import org.jboss.weld.bootstrap.api.Service;
 
 /**
+ * Allows to install {@link Service} as {@link org.jboss.msc.service.Service}.
+ * <p>
+ * The service installed is later added as a dependency of the Weld bootstrap service.
  *
  * @author Martin Kouba
  */
-public class JaxwsModuleServiceProvider implements ModuleServicesProvider {
+public interface BootstrapDependencyInstaller {
 
-    @Override
-    public Collection<Service> getServices(DeploymentUnit rootDeploymentUnit, DeploymentUnit deploymentUnit, Module module, ResourceRoot resourceRoot) {
-        return Collections.singleton(new WeldJaxwsInjectionServices(deploymentUnit));
-    }
+    /**
+     *
+     * @param serviceTarget
+     * @param deploymentUnit
+     * @param jtsEnabled
+     * @return the service name
+     */
+    ServiceName install(ServiceTarget serviceTarget, DeploymentUnit deploymentUnit, boolean jtsEnabled);
+
 }
