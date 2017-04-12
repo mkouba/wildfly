@@ -24,7 +24,7 @@ package org.jboss.as.test.integration.weld.extensions;
 /**
  * @author Stuart Douglas
  */
-public interface SomeInterface {
+public interface ExtensionSLSBInterface {
 
-    void testInjectionWorked();
+    void testAfterDeploymentValidation();
 }

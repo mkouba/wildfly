@@ -21,15 +21,12 @@
  */
 package org.jboss.as.test.integration.weld.extensions;
 
-import org.junit.Assert;
-
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Inject;
+
+import org.junit.Assert;
 
 /**
  * @author Stuart Douglas
@@ -38,26 +35,12 @@ import javax.inject.Inject;
 @Local(SomeInterface.class)
 public class WarSLSB  implements  SomeInterface, Extension {
 
-    private transient boolean afterDeploymentValidationCalled = false;
-
     @Inject
     private MyBean myBean;
-
 
     @Override
     public void testInjectionWorked() {
         Assert.assertNotNull(myBean);
-    }
-
-    @Override
-    public void testAfterDeploymentValidation() {
-            Assert.assertTrue(afterDeploymentValidationCalled);
-        }
-
-
-    void afterDeploymentValidation(@Observes AfterDeploymentValidation event, BeanManager manager) {
-        System.out.println("xxx afterDeploymentValidation was called");
-        afterDeploymentValidationCalled = true;
     }
 
 }

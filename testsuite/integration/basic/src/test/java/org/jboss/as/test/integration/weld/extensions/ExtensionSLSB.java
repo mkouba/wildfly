@@ -21,10 +21,20 @@
  */
 package org.jboss.as.test.integration.weld.extensions;
 
-/**
- * @author Stuart Douglas
- */
-public interface SomeInterface {
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 
-    void testInjectionWorked();
+/**
+ */
+@Stateless
+public class ExtensionSLSB implements ExtensionSLSBInterface {
+
+    @Inject
+    private AddBeanExtension extension;
+
+    @Override
+    public void testAfterDeploymentValidation() {
+        extension.testAfterDeploymentValidation();
+    }
+
 }

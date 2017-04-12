@@ -21,6 +21,10 @@
  */
 package org.jboss.as.test.integration.weld.extensions;
 
+import javax.enterprise.inject.spi.Extension;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -32,10 +36,6 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.enterprise.inject.spi.Extension;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
 /**
  * AS7-623
@@ -66,10 +66,11 @@ public class ExtensionsInEarDiscoveredTestCase {
 
         war.addAsLibrary(warLib);
         war.addClass(WarSLSB.class);
+        war.addClass(ExtensionSLSB.class);
         war.add(EmptyAsset.INSTANCE, "WEB-INF/beans.xml");
 
         JavaArchive lib = ShrinkWrap.create(JavaArchive.class, "lib.jar");
-        lib.addClasses(ExtensionsInEarDiscoveredTestCase.class, SomeInterface.class);
+        lib.addClasses(ExtensionsInEarDiscoveredTestCase.class, SomeInterface.class, ExtensionSLSBInterface.class);
         ear.addAsLibrary(lib);
 
         ear.addAsModule(war);
@@ -87,7 +88,7 @@ public class ExtensionsInEarDiscoveredTestCase {
 
     @Test
     public void testAfterDeploymentValidation() throws NamingException {
-        SomeInterface bean = (SomeInterface) new InitialContext().lookup("java:global/testExtensions/testWar/WarSLSB");
+        ExtensionSLSBInterface bean = (ExtensionSLSBInterface) new InitialContext().lookup("java:global/testExtensions/testWar/ExtensionSLSB");
         bean.testAfterDeploymentValidation();
     }
 

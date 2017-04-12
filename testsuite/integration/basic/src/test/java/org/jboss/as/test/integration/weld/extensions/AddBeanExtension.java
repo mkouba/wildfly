@@ -22,17 +22,32 @@
 package org.jboss.as.test.integration.weld.extensions;
 
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+
+import org.junit.Assert;
 
 /**
  * @author Stuart Douglas
  */
 public class AddBeanExtension implements Extension {
 
+    private transient boolean afterDeploymentValidationCalled = false;
+
     public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery beforeBeanDiscovery, final BeanManager beanManager) {
         beforeBeanDiscovery.addAnnotatedType(beanManager.createAnnotatedType(MyBean.class));
     }
+
+    void afterDeploymentValidation(@Observes AfterDeploymentValidation event, BeanManager manager) {
+        System.out.println("xxx afterDeploymentValidation was called");
+        afterDeploymentValidationCalled = true;
+    }
+
+    public void testAfterDeploymentValidation() {
+            Assert.assertTrue(afterDeploymentValidationCalled);
+        }
+
 
 }
