@@ -25,6 +25,8 @@ import static org.jboss.as.weld.util.ResourceInjectionUtilities.getResourceAnnot
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ServiceLoader;
 
 import javax.annotation.Resource;
@@ -91,8 +93,12 @@ public class WeldResourceInjectionServices extends AbstractResourceInjectionServ
         } catch (NamingException e) {
             throw new RuntimeException(e);
         }
-        this.resourceResolvers = ServiceLoader.load(ResourceInjectionResolver.class,
-                WildFlySecurityManager.getClassLoaderPrivileged(WeldResourceInjectionServices.class));
+        List<ResourceInjectionResolver> resolvers = new ArrayList<>();
+        for (ResourceInjectionResolver resolver : ServiceLoader.load(ResourceInjectionResolver.class,
+                WildFlySecurityManager.getClassLoaderPrivileged(WeldResourceInjectionServices.class))) {
+            resolvers.add(resolver);
+        }
+        this.resourceResolvers = resolvers;
     }
 
     protected String getEJBResourceName(InjectionPoint injectionPoint, String proposedName) {
